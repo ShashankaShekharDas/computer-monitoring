@@ -1,1 +1,4 @@
 psutil~=5.9.4
+mysql~=0.0.3
+mysql-connector-python~=8.0.32
+WMI~=1.5.1

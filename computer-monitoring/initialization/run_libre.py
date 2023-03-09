@@ -1,7 +1,10 @@
 import os.path
 import subprocess
+
 import psutil
+
 from commons import variables
+from commons.Exceptions.LibreException import LibreException
 
 
 def check_if_libre_running():
@@ -19,6 +22,5 @@ def run_libre_if_not_running():
     try:
         if not check_if_libre_running():
             run_libre_executable()
-        return True
     except Exception as e:
-        return False
+        raise LibreException("Could not run Libre HW Monitor " + e)

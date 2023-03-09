@@ -1,40 +1,34 @@
+import json
+from datetime import datetime
 import wmi
 
-hwmon = wmi.WMI(namespace="root\LibreHardwareMonitor")
-sensors = hwmon.Sensor(SensorType="Voltage")
 
-set_of_data_collected = {
-    "Power",
-    "Temperature",
-    "Clock",
-    "Load",
-    "Fan",
-    "Voltage"
-}
+class GetDataHw:
+    def __init__(self):
+        self.hwmon = wmi.WMI(namespace=r"root\LibreHardwareMonitor")
+        self.data_json = dict()
+        self.set_of_data_collected = {
+            "Power",
+            "Temperature",
+            "Clock",
+            "Load",
+            "Fan",
+            "Voltage"
+        }
 
-'''
-    Data to be collected
-    Identifier : Name, Min, Max, Value, Time (upto exact milisecond)
-    
-    Data collect every second
-    
-    Store in 2 places
-    -> Local DB 
-    -> Cloud
-    
-    
-    Confirm if sensor name will change, i dont think so, but confirm
-    If SQL DB 
-    Normalize tables based on 
-    Sensor Type, then identifier name, then based on name
-'''
+    def get_specific_monitoring_fields(self, timestamp, parameter, sensor_data):
+        for data in sensor_data:
+            if data.Identifier[1:].split("/")[0] in {"nvme", "hdd", "gpu-nvidia", "amdcpu"}:
+                if parameter not in self.data_json:
+                    self.data_json[parameter] = dict()
+                self.data_json[parameter][data.Identifier] = {
+                    "Timestamp": timestamp,
+                    "Name": data.Name,
+                    "Value": data.Value
+                }
 
-sensorData = {i: {} for i in set_of_data_collected}
-
-print(sensorData)
-for s in sensors:
-    if s.Identifier[1:].split("/")[0] in {"nvme", "hdd", "gpu-nvidia", "amdcpu"}:
-        print(s.Identifier, s.Max, s.Min, s.Name, s.Value)
-#     # sensorTypes.add(s.SensorType)
-#
-# print(sensorTypes)
+    def get_monitoring_data(self):
+        time_now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        for parameter in self.set_of_data_collected:
+            self.get_specific_monitoring_fields(time_now, parameter, self.hwmon.Sensor(SensorType=parameter))
+        self.data_json = json.dumps(self.data_json)
