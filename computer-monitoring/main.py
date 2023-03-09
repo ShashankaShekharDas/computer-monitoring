@@ -1,11 +1,12 @@
+import datetime
 import json
+import re
 from time import sleep
 
+from CRUD import create_manage_db
 from commons.Exceptions import LibreException, DBException
 from data_fetching import get_data_hw
 from initialization import run_libre
-from CRUD import create_manage_db
-import re
 
 
 def get_data_and_put_db(libre_data):
@@ -27,6 +28,12 @@ def get_data_and_put_db(libre_data):
 
 try:
     while True:
+        '''
+            Bug: On present conditions it takes 11 seconds to write to both Azure and Local DB
+            And 5 second sleep time, so total 16 seconds gap
+            Multithreading?
+        '''
+        time_start = datetime.datetime.now()
         # initialise objects
         data_hw = get_data_hw.GetDataHw()
         database_connection = create_manage_db.ManageDB()
