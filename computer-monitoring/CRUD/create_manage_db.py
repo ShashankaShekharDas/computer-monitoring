@@ -22,7 +22,7 @@ class ManageDB:
             self.db_onprem = mysql.connector.connect(
                 host="localhost",
                 user="root",
-                password="maarkandeya",  # move password to keyvault
+                password="-",  # move password to keyvault
                 database="monitoring"
             )
             self.cursor_onprem = self.db_onprem.cursor()
